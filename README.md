@@ -95,7 +95,7 @@ Arguments must be validated in a consistent and predictable way. The argument ha
 
 #### Rules
 
-1. All arguments must be wrapped in square brackets when defined in the LAMBDA signature. For example:
+1. All arguments must be wrapped in square brackets when defined in the [`LAMBDA`](https://support.microsoft.com/en-gb/office/lambda-function-bd212d27-1cd1-4321-a34a-ccbf254b8b67) signature. For example:
     ```js
     =LAMBDA([number],...
     ```
@@ -105,19 +105,12 @@ Arguments must be validated in a consistent and predictable way. The argument ha
     _number, number,
     ```
 
-3. Required arguments must evaluate to NA() when omitted, so they can be validated for omission. For example:
+3. Required arguments must evaluate to `NA()` when omitted, so they can be validated. For example:
     ```js
     _number, IF(ISOMITTED(number), NA(), number)
     ```
 
-4. Optional arguments must evaluate to a safe default when omitted, depending on the type. For example:
-    ```js
-    _text, IF(ISOMITTED(text), "", text),
-    _boolean, IF(ISOMITTED(boolean), FALSE, boolean),
-    _number, IF(ISOMITTED(number), 0, number),
-    ```
-
-5. Required arguments which are invalid must be validated for omission and assigned clear error messages. For example:  
+4. Required arguments which are invalid must be assigned clear error messages. For example:  
     ```js
     _number, IF(ISOMITTED(number), NA(), number)
     _ERR_number, IFS(
@@ -127,7 +120,14 @@ Arguments must be validated in a consistent and predictable way. The argument ha
     ),
     ```
 
-6. Optional arguments which are invalid must not be validated for omission, but should still be evaluated for type etc if essential. For example:  
+4. Optional arguments must evaluate to a safe default when omitted, depending on the type. For example:
+    ```js
+    _text, IF(ISOMITTED(text), "", text),
+    _boolean, IF(ISOMITTED(boolean), FALSE, boolean),
+    _number, IF(ISOMITTED(number), 0, number),
+    ```
+
+6. Optional arguments which are invalid must *not* be validated for omission, but should still be evaluated for anything else, like type. For example:  
     ```js
     _prefix, IF(ISOMITTED(prefix), "", prefix),
     _ERR_prefix, IFS(
@@ -162,9 +162,9 @@ It ensures that:
 
 #### Principles
 
-- Each argument produces its own `_ERR_variableName`
-- Additional internal validation may also produce error variables
-- Multiple error variables are combined into a single `_ERR_msg`
+- Each validation block produces an error message
+- A single validation block is defined as `_ERR_msg`
+- Multiple error blocks are defined as `_ERR_variableName`, then combined into a single `_ERR_msg` variable
 - The combination should always follow this sequence:
     ```js
     _ERR_msg, LET(
@@ -192,12 +192,10 @@ It ensures that:
 
 ### Functions
 
-Functions in Excel are a way to create reusable code blocks to get consistent results in many places. 
-
-We define them once using the `LAMBDA` keyword. Then save them as named functions, replacing the word `LAMBDA` with a unique name which describes their purpose clearly.
+We define them once using the [`LAMBDA`](https://support.microsoft.com/en-gb/office/lambda-function-bd212d27-1cd1-4321-a34a-ccbf254b8b67) keyword. Then save them as named functions with a unique name to describes their purpose clearly.
 
 **Rules**
-- **Text**: PascalCase
+- **Text**: [PascalCase](https://www.theserverside.com/definition/Pascal-case)
 - **Prefix**: Not allowed
 - **Postfix**: Not allowed
 - **Reasoning**: PascalCase helps differentiate custom functions from native Excel functions, which use Uppercase. Functions should not use a prefix or postfix with symbols or numbers, they should have unique names which describe their purpose.
@@ -214,10 +212,10 @@ We define them once using the `LAMBDA` keyword. Then save them as named function
 
 ### Arguments
 
-Arguments are the values we pass into functions. They should have a name which describes their expectation clearly. As per the arguments handling pattern, they should always be wrapped in square brackets when defined as part of a LAMBDA function.
+Arguments are the values we pass into functions. They should have a name which describes their expectation clearly. As per the arguments handling pattern, they should always be wrapped in square brackets when defined as part of a [`LAMBDA`](https://support.microsoft.com/en-gb/office/lambda-function-bd212d27-1cd1-4321-a34a-ccbf254b8b67) function.
 
 **Rules**
-- **Text**: camelCase
+- **Text**: [camelCase](https://www.techtarget.com/whatis/definition/CamelCase)
 - **Prefix**: Not allowed
 - **Postfix**: Numbers allowed
 - **Reasoning**: camelCase helps differentiate arguments from functions, which use Uppercase or PascalCase. Where you need to define multiple arguments which are similar, you can postfix them with numbers.
@@ -239,7 +237,7 @@ Arguments are the values we pass into functions. They should have a name which d
 Standard variables are anything which is not an error, result or the final output from the function. They are used to store temporary values and pass them down through the cascade, making the code easier to read.
 
 **Rules**
-- **Text**: camelCase
+- **Text**: [camelCase](https://www.techtarget.com/whatis/definition/CamelCase)
 - **Prefix**: `_` (Underscore)
 - **Postfix**: Numbers allowed
 - **Reasoning**: camelCase helps differentiate variables from functions, which use Uppercase or PascalCase. An underscore prefix helps differentiate from arguments, which also use camelCase.
@@ -252,12 +250,16 @@ Standard variables are anything which is not an error, result or the final outpu
 =LET(
   // Sets _upperText to "SOME UPPERCASE TEXT"
   _upperText, "SOME UPPERCASE TEXT",
+
   // Sets _lowerText to "some uppercase text"
   _lowerText, LOWER(_upperText),
+
   // Sets _result to "some lowercase text"
   _result, SUBSTITUTE(_lowerText, "uppercase", "lowercase"),
+
   // Sets _output to _result to follow convention
   _output, _result,
+  
   // Returns the final _output and displays it in the cell
   _output
 )
@@ -281,12 +283,16 @@ The `_result` variable is reserved for the final computed value of the function.
 LET(
   // Sets _number1 to 5
   _number1, 5,
+
   // Sets _number2 to 10
   _number2, 10,
+
   // Sets _result to 50, which is (5 * 10)
   _result, (_number1 * _number2),
+
   // Sets _output to _result to follow convention
   _output, _result,
+
   // Returns the final _output and displays it in the cell
   _output
 )
@@ -310,12 +316,16 @@ The `_output` variable is reserved for the final return value of the function. T
 LET(
   // Sets _number1 to 5
   _number1, 5,
+
   // Sets _number2 to 10
   _number2, 10,
+
   // Sets _result to 50, which is (5 * 10)
   _result, (_number1 * _number2),
+
   // Sets _output to _result to follow convention
   _output, _result,
+
   // Returns the final _output and displays it in the cell
   _output
 )
@@ -346,6 +356,7 @@ Error message variables should always be defined close to their logic checks in 
   LET(
     // Sets _input value if valid, or as error if not
     _input, IF(ISOMITTED(input), NA(), input),
+
     // Sets _ERR_msg to the outcome of the IF logic
     _ERR_msg, IF(
       // If _input is omitted, return this error message
@@ -353,8 +364,10 @@ Error message variables should always be defined close to their logic checks in 
       // If it's not, return empty string
       ""
     ),
+
     // Sets _result to TRUE or FALSE depending on if _input is a number
     _result, ISNUMBER(_input),
+
     // _output is set to the outcome of the IF logic
     _output, IF(
       // If _ERR_msg contains more than 0 characters
@@ -364,6 +377,7 @@ Error message variables should always be defined close to their logic checks in 
       // Otherwise, return _result
       _result
     ),
+
   // Returns the final _output and displays it in the cell
     _output
   )
@@ -378,6 +392,7 @@ Error message variables should always be defined close to their logic checks in 
     LET(
     // Sets _number1 value if valid, or as error if not
     _number1, IF(ISOMITTED(number1), NA(), number1),
+
     // Sets _ERR_number1 to the outcome of the IF logic
     _ERR_number1, IFS(
       // If _number1 is omitted, return this error message
@@ -387,6 +402,7 @@ Error message variables should always be defined close to their logic checks in 
       // If _number1 is valid, return empty string
       TRUE, ""
     ),
+
     // Sets _number2 value if valid, or as error if not
     _number2, IF(ISOMITTED(number2), NA(), number2),
     _ERR_number2, IFS(
@@ -397,7 +413,8 @@ Error message variables should always be defined close to their logic checks in 
       // If _number2 is valid, return empty string
       TRUE, ""
     ),
-    // Use a second LET cascade to define _ERR_msg
+
+    // Use a second LET cascade to define and combine _ERR_msg
     _ERR_msg, LET(
       // Sets _errors to be a combined array of errors
       _errors, VSTACK(_ERR_number1, _ERR_number2),
@@ -408,8 +425,10 @@ Error message variables should always be defined close to their logic checks in 
       // Returns _joined and sets it as the value of _ERR_msg
       _joined
     ),
+
     // Sets _result to the value of _number1 * _number2
     _result, (_number1 * _number2),
+
     // Sets the value of _output to the outcome of the IF logic
     _output, IF(
       // If _ERR_msg contains more than 0 characters
@@ -419,6 +438,7 @@ Error message variables should always be defined close to their logic checks in 
       // Otherwise, set _output to be the _result
       _result
     ),
+    
   // Returns the final _output and displays it in the cell
     _output
   )
