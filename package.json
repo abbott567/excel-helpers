@@ -1,0 +1,11 @@
+{
+  "name": "excel-helpers",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Craig Abbott (@abbott567)",
+  "license": "ISC",
+  "description": "A collection of named LAMBDA functions for Excel with unit tests"
+}
